@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Hello MUI</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="css/mui.min.css">
+		<style>
+			html,
+			body {
+				background-color: #efeff4;
+			}
+			.title {
+				padding: 20px 15px 10px;
+				color: #6d6d72;
+				font-size: 15px;
+				background-color: #fff;
+			}
+			
+			.mui-plus header.mui-bar {
+				display: none!important;
+			}
+			.mui-plus .mui-bar-nav~.mui-content {
+				padding: 0!important;
+			}
+			
+			.mui-plus .plus{
+				display: inline;
+			}
+			
+			.plus{
+				display: none;
+			}
+			
+			#topPopover {
+				position: fixed;
+				top: 16px;
+				right: 6px;
+			}
+			#topPopover .mui-popover-arrow {
+				left: auto;
+				right: 6px;
+			}
+			p {
+				text-indent: 22px;
+			}
+			span.mui-icon {
+				font-size: 14px;
+				color: #007aff;
+				margin-left: -15px;
+				padding-right: 10px;
+			}
+			.mui-popover {
+				height: 300px;
+			}
+			.mui-content {
+				padding: 10px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="pullrefresh" class="mui-content">
+			<div class="mui-scroll">
+
+				<div id="segmentedControl" class="mui-segmented-control">
+					<a class="mui-control-item mui-active" href="#item1">我正参与</a>
+					<a class="mui-control-item" href="#item2">我的关注</a>
+					<a class="mui-control-item" href="#item3">我已完成</a>
+					<a class="mui-control-item" href="#item3">全部项目</a>
+				</div>
+				<ul id="project_list" class="mui-table-view mui-table-view-chevron">
+					<li class="mui-table-view-cell"><a href="javascript:showProjectList()">project 1</a></li>
+					<li class="mui-table-view-cell">project 2</a></li>
+					<li class="mui-table-view-cell">project 3</a></li>
+					<li class="mui-table-view-cell">project 4</a></li>
+					<li class="mui-table-view-cell">project 5</a></li>
+					<li class="mui-table-view-cell">project 6</a></li>
+					<li class="mui-table-view-cell">project 7</a></li>
+					<li class="mui-table-view-cell">project 8</a></li>
+				</ul>
+			</div>
+		</div>
+		
+		<script src="js/mui.min.js"></script>
+		<script>
+			mui.init(
+				{swipeBack: false,
+				//下拉上滑监听
+				pullRefresh: {
+					container: '#pullrefresh',
+					down: {
+						callback: pulldownRefresh
+					},
+					up: {
+						contentrefresh: '正在加载...',
+						callback: pullupRefresh
+					}
+				},
+				//手势监听
+				gestureConfig:{ tap: true, //默认为true 
+    					doubletap: true, //默认为false 
+    					longtap: true, //默认为false 
+    					swipe: true, //默认为true 
+    					drag: true, //默认为true 
+    					hold:false,//默认为false，不监听 
+    					release:false//默认为false，不监听 
+    				   },
+    			//子页
+    			subpages:[{
+      					url:'list.html',
+      					id:'list.html',
+      					styles:{
+        				top:'0px',//mui标题栏默认高度为45px；
+        				bottom:'0px'//默认为0px，可不定义；
+      					},
+      					extras:{}
+    					}]
+				
+			});
+			//mui事件，单击打开所分配的任务
+			mui("#project_list").on('tap','.mui-table-view-cell',function(event)
+			{
+				//打开任务详情 
+				mui.openWindow({ id:'task', url:'sub2-task-list.html' }); 
+			})
+			
+			//mui事件，长按打开项目详情
+			mui(".mui-table-view").on('longtap','.mui-table-view-cell',function(event)
+			{
+				//打开项目详情 
+				mui.openWindow({ id:'detail', url:'sub2-project-detail-yoyo.html' }); 
+			})
+			
+			function showTaskList(){
+				var url = "sub2-task-list.html";
+			    plus.webview.create(url,url,{},{}).show();
+			}
+			/**
+			 * 下拉刷新具体业务实现
+			 */
+			function pulldownRefresh() {
+				setTimeout(function() {
+					var table = document.body.querySelector('.mui-table-view');
+					var cells = document.body.querySelectorAll('.mui-table-view-cell');
+					for (var i = cells.length, len = i + 3; i < len; i++) {
+						var li = document.createElement('li');
+						li.className = 'mui-table-view-cell';
+						li.innerHTML = '<a class="mui-navigate-right">Item ' + (i + 1) + '</a>';
+						//下拉刷新，新纪录插到最前面；
+						table.insertBefore(li, table.firstChild);
+					}
+					mui('#pullrefresh').pullRefresh().endPulldownToRefresh(); //refresh completed
+				}, 1000);
+			}
+			var count = 0;
+			/**
+			 * 上拉加载具体业务实现
+			 */
+			function pullupRefresh() {
+				setTimeout(function() {
+					mui('#pullrefresh').pullRefresh().endPullupToRefresh((++count > 2)); //参数为true代表没有更多数据了。
+					var table = document.body.querySelector('.mui-table-view');
+					var cells = document.body.querySelectorAll('.mui-table-view-cell');
+					for (var i = cells.length, len = i + 20; i < len; i++) {
+						var li = document.createElement('li');
+						li.className = 'mui-table-view-cell';
+						li.innerHTML = '<a class="mui-navigate-right">Item ' + (i + 1) + '</a>';
+						table.appendChild(li);
+					}
+				}, 1000);
+			}
+		</script>
+	</body>
+</html>
